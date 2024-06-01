@@ -19,7 +19,7 @@ export function HomeScreen() {
   // 0 -> not editable
   // 1 -> creator
 
-
+  let [isPlaying, setIsPlaying] = useState<boolean>(false)
 
   return (
     <View className={`h-full w-full bg-black`} style={styles.boardParent}>
@@ -39,7 +39,6 @@ export function HomeScreen() {
                 n[i] = 0
                 setBoard(n)
               }
-              console.log(board, i)
             }}
             key={i}
             style={{
@@ -53,11 +52,15 @@ export function HomeScreen() {
       </View>
 
       <View style={styles.buttonBar}>
-        <Pressable onPress={() => {
-          setMode(0)
-          let n = nextGeneration(board,width,height);
-          setBoard(n);
-        }}>
+        <Pressable
+          onPress={() => {
+            setMode(0)
+            setIsPlaying(true)
+            setInterval(() => {
+              setBoard(board=>nextGeneration(board, width,height))
+            }, 1000)
+          }}
+        >
           <Text style={styles.button}>Start</Text>
         </Pressable>
         <Pressable onPress={() => {}}>
@@ -88,42 +91,53 @@ export function HomeScreen() {
     </View>
   )
 }
-function getNeighborCount(grid: number[], x: number, y: number, width: number, height: number): number {
+function getNeighborCount(
+  grid: number[],
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+): number {
   const directions = [
-    [-1, -1], [-1, 0], [-1, 1],
-    [0, -1],          [0, 1],
-    [1, -1], [1, 0], [1, 1]
-  ];
+    [-1, -1],
+    [-1, 0],
+    [-1, 1],
+    [0, -1],
+    [0, 1],
+    [1, -1],
+    [1, 0],
+    [1, 1],
+  ]
 
-  let count = 0;
+  let count = 0
   for (const [dx, dy] of directions) {
-    const newX = x + dx!;
-    const newY = y + dy!;
+    const newX = x + dx!
+    const newY = y + dy!
     if (newX >= 0 && newX < width && newY >= 0 && newY < height) {
-      count += grid[newY * width + newX]!;
+      count += grid[newY * width + newX]!
     }
   }
-  return count;
+  return count
 }
 
 function nextGeneration(grid: Grid, width: number, height: number): Grid {
-  const newGrid = [...grid];
+  const newGrid = [...grid]
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      const index = y * width + x;
-      const liveNeighbors = getNeighborCount(grid, x, y, width, height);
+      const index = y * width + x
+      const liveNeighbors = getNeighborCount(grid, x, y, width, height)
       if (grid[index] === 1) {
         if (liveNeighbors < 2 || liveNeighbors > 3) {
-          newGrid[index] = 0; // Cell dies
+          newGrid[index] = 0 // Cell dies
         }
       } else {
         if (liveNeighbors === 3) {
-          newGrid[index] = 1; // Cell becomes alive
+          newGrid[index] = 1 // Cell becomes alive
         }
       }
     }
   }
 
-  return newGrid;
+  return newGrid
 }
