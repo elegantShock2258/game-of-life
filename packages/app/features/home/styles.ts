@@ -12,6 +12,18 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
   },
+  buttonPressed: {
+    borderWidth: 1,
+    borderColor: 'white',
+  },
+  buttonHovered: {
+    backgroundColor: '#ffffff30',
+    color: '#000000',
+  },
+  buttonText: {
+    fontSize: 20,
+    color: '#FFFFFF',
+  },
   cell: {
     borderWidth: 1,
     borderColor: 'white',
@@ -25,7 +37,6 @@ export const styles = StyleSheet.create({
     top: 10,
     left: '50%',
     transform: 'translate(-50%)',
-    fontSize: 20,
     color: '#FFFFFF',
     backgroundColor: '#000000a0',
     padding: 10,
@@ -43,13 +54,13 @@ export const styles = StyleSheet.create({
     fontSize: 20,
     color: '#FFFFFF',
     backgroundColor: '#000000a0',
-    padding: 10,
   },
-  button:{
+  button: {
     color: '#FFFFFF',
     fontSize: 20,
+    padding: 10,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-  }
+  },
 })

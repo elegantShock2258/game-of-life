@@ -3,7 +3,13 @@
 import { View } from 'app/design/view'
 import { styles } from './styles'
 import { useState, useRef } from 'react'
-import { Alert, Button, Text, Pressable } from 'react-native'
+import { Text, Pressable } from 'react-native'
+
+// -1 -> eraser
+// 0 -> not editable
+// 1 -> creator
+type modes = 0 | 1 | -1
+
 export function HomeScreen() {
   const width = 100
   const height = 100
@@ -14,13 +20,11 @@ export function HomeScreen() {
   const numCells = Math.ceil((width * height) / (cellHeight * cellWidth))
 
   let [board, setBoard] = useState<number[]>(new Array(numCells).fill(0))
-  let [mode, setMode] = useState<number>(0)
-  // -1 -> eraser
-  // 0 -> not editable
-  // 1 -> creator
 
+  let [mode, setMode] = useState<modes>(0)
+  let paused = false
   let isPlaying = false
-  let timer = useRef<NodeJS.Timer>();
+  let timer = useRef<NodeJS.Timer>()
   return (
     <View className={`h-full w-full bg-black`} style={styles.boardParent}>
       <View
@@ -56,6 +60,7 @@ export function HomeScreen() {
           onPress={() => {
             if (!isPlaying) {
               setMode(0)
+              paused = false
               isPlaying = true
               timer.current = setInterval(() => {
                 if (isPlaying) {
@@ -65,6 +70,11 @@ export function HomeScreen() {
               }, 1000)
             }
           }}
+          style={({ pressed, hovered }) => [
+            styles.button,
+            isPlaying && styles.buttonPressed,
+            hovered && styles.buttonHovered,
+          ]}
         >
           <Text style={styles.button}>Start</Text>
         </Pressable>
@@ -72,8 +82,14 @@ export function HomeScreen() {
           onPress={() => {
             setMode(0)
             isPlaying = false
+            paused = true
             clearInterval(timer.current!)
           }}
+          style={({ pressed, hovered }) => [
+            styles.button,
+            paused && styles.buttonPressed,
+            hovered && styles.buttonHovered,
+          ]}
         >
           <Text style={styles.button}>Pause</Text>
         </Pressable>
@@ -84,6 +100,7 @@ export function HomeScreen() {
             setBoard(temp)
             clearInterval(timer.current!)
           }}
+          style={styles.button}
         >
           <Text style={styles.button}>Reset</Text>
         </Pressable>
@@ -94,16 +111,26 @@ export function HomeScreen() {
           onPress={() => {
             setMode(1)
           }}
+          style={({ pressed, hovered }) => [
+            styles.button,
+            mode == 1 && styles.buttonPressed,
+            hovered && styles.buttonHovered,
+          ]}
         >
-          <Text style={styles.button}>Creator</Text>
+          <Text style={styles.buttonText}>Creator</Text>
         </Pressable>
 
         <Pressable
           onPress={() => {
             setMode(-1)
           }}
+          style={({ pressed, hovered }) => [
+            styles.button,
+            mode == -1 && styles.buttonPressed,
+            hovered && styles.buttonHovered,
+          ]}
         >
-          <Text style={styles.button}>Eraser</Text>
+          <Text style={styles.buttonText}>Eraser</Text>
         </Pressable>
       </View>
     </View>
@@ -138,7 +165,11 @@ function getNeighborCount(
   return count
 }
 
-function nextGeneration(grid: number[], width: number, height: number): number[] {
+function nextGeneration(
+  grid: number[],
+  width: number,
+  height: number,
+): number[] {
   const newGrid = [...grid]
 
   for (let y = 0; y < height; y++) {
