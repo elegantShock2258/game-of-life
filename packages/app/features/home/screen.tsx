@@ -2,7 +2,7 @@
 
 import { View } from 'app/design/view'
 import { styles } from './styles'
-import { useState, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { Alert, Button, Text, Pressable } from 'react-native'
 export function HomeScreen() {
   const width = 100
@@ -19,8 +19,8 @@ export function HomeScreen() {
   // 0 -> not editable
   // 1 -> creator
 
-  let [isPlaying, setIsPlaying] = useState<boolean>(false)
-
+  let isPlaying = false
+  let timer = useRef<NodeJS.Timer>();
   return (
     <View className={`h-full w-full bg-black`} style={styles.boardParent}>
       <View
@@ -54,19 +54,37 @@ export function HomeScreen() {
       <View style={styles.buttonBar}>
         <Pressable
           onPress={() => {
-            setMode(0)
-            setIsPlaying(true)
-            setInterval(() => {
-              setBoard(board=>nextGeneration(board, width,height))
-            }, 1000)
+            if (!isPlaying) {
+              setMode(0)
+              isPlaying = true
+              timer.current = setInterval(() => {
+                if (isPlaying) {
+                  console.log('f', isPlaying)
+                  setBoard((board) => nextGeneration(board, width, height))
+                }
+              }, 1000)
+            }
           }}
         >
           <Text style={styles.button}>Start</Text>
         </Pressable>
-        <Pressable onPress={() => {}}>
+        <Pressable
+          onPress={() => {
+            setMode(0)
+            isPlaying = false
+            clearInterval(timer.current!)
+          }}
+        >
           <Text style={styles.button}>Pause</Text>
         </Pressable>
-        <Pressable onPress={() => {}}>
+        <Pressable
+          onPress={() => {
+            setMode(0)
+            let temp = new Array(numCells).fill(0)
+            setBoard(temp)
+            clearInterval(timer.current!)
+          }}
+        >
           <Text style={styles.button}>Reset</Text>
         </Pressable>
       </View>
@@ -120,7 +138,7 @@ function getNeighborCount(
   return count
 }
 
-function nextGeneration(grid: Grid, width: number, height: number): Grid {
+function nextGeneration(grid: number[], width: number, height: number): number[] {
   const newGrid = [...grid]
 
   for (let y = 0; y < height; y++) {
